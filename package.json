@@ -1,7 +1,7 @@
 {
   "name": "rhythmdna",
   "version": "1.0.0",
-  "main": "dist-electron/main.js",
+  "main": "dist-electron/main/main.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",

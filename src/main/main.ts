@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { JsonlDatabase } = require('../shared/database/JsonlDatabase');
+const JsonlDatabaseModule = require(path.join(__dirname, '..', 'shared', 'database', 'JsonlDatabase'));
+const { JsonlDatabase } = JsonlDatabaseModule;
 
 let mainWindow: any;
 let db: any;
