@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Analysis from '../routes/Analysis';
 import Search from '../routes/Search';
 import Settings from '../routes/Settings';

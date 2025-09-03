@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { JsonlDatabase } from '../shared/database/JsonlDatabase';
 
@@ -46,7 +46,7 @@ ipcMain.handle('update-search-criteria', async () => {
     await db.updateSearchCriteria();
     return { success: true, message: 'Search criteria updated successfully' };
   } catch (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: (error as Error).message };
   }
 });
 
@@ -55,12 +55,12 @@ ipcMain.handle('get-db-status', () => {
 });
 
 // Audio file operations
-ipcMain.handle('insert-audio-file', async (event, record) => {
+ipcMain.handle('insert-audio-file', async (_, record) => {
   try {
     const id = await db.insertAudioFile(record);
     return { success: true, id };
   } catch (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: (error as Error).message };
   }
 });
 
@@ -69,7 +69,7 @@ ipcMain.handle('get-all-audio-files', async () => {
     const files = await db.getAllAudioFiles();
     return { success: true, data: files };
   } catch (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: (error as Error).message };
   }
 });
 

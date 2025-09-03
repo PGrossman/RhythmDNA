@@ -1,10 +1,13 @@
 {
   "name": "rhythmdna",
   "version": "1.0.0",
-  "main": "dist-electron/main.js",
+  "type": "module",
+  "main": "dist-electron/main/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:renderer": "vite build",
+    "build": "npm run build:main && npm run build:renderer && electron-builder",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:pack": "electron-builder",
     "electron:dist": "npm run build && electron-builder --publish=never"
@@ -19,6 +22,7 @@
   "license": "ISC",
   "description": "RhythmDNA - Audio Analysis Electron Application",
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^24.3.0",
     "@vitejs/plugin-react": "^5.0.2",
     "autoprefixer": "^10.4.21",

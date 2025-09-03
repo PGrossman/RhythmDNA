@@ -1,4 +1,4 @@
-import { dialog } from 'electron';
+// import { dialog } from 'electron';
 
 export class FileHandlerService {
   static async selectAudioFile(): Promise<string | null> {

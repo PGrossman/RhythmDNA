@@ -17,7 +17,7 @@ export class FFMPEGService {
     });
   }
 
-  static async extractAudioFeatures(filePath: string): Promise<any> {
+  static async extractAudioFeatures(_filePath: string): Promise<any> {
     // Placeholder for audio feature extraction
     // This will be implemented with specific audio analysis logic
     return {

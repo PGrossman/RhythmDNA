@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { createReadStream, createWriteStream } from 'fs';
+import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
 
 export interface AudioFileRecord {

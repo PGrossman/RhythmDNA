@@ -1,11 +1,9 @@
 export class OllamaClient {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = 'http://localhost:11434') {
-    this.baseUrl = baseUrl;
+  constructor(_baseUrl: string = 'http://localhost:11434') {
+    // Base URL will be used in future implementation
   }
 
-  async query(prompt: string, model: string = 'llama2'): Promise<string> {
+  async query(_prompt: string, _model: string = 'llama2'): Promise<string> {
     // Ollama client implementation will go here
     return 'Ollama response placeholder';
   }

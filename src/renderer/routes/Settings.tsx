@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 interface DbStatus {
   path: string;
@@ -31,7 +31,7 @@ export default function Settings() {
       setUpdateMessage(result.message);
       setTimeout(() => setUpdateMessage(''), 3000);
     } catch (error) {
-      setUpdateMessage('Error updating criteria: ' + error.message);
+      setUpdateMessage('Error updating criteria: ' + (error as Error).message);
     }
   };
 

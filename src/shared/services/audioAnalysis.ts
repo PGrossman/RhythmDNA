@@ -1,7 +1,7 @@
 import { AudioAnalysis, AudioMetadata } from '../types';
 
 export class AudioAnalysisService {
-  static async analyzeAudio(filePath: string): Promise<AudioAnalysis> {
+  static async analyzeAudio(_filePath: string): Promise<AudioAnalysis> {
     // Placeholder for audio analysis implementation
     // This will integrate with FFMPEG and audio processing libraries
     
@@ -42,7 +42,7 @@ export class AudioAnalysisService {
     };
   }
 
-  static async extractFeatures(filePath: string): Promise<any> {
+  static async extractFeatures(_filePath: string): Promise<any> {
     // Placeholder for feature extraction
     return {};
   }
