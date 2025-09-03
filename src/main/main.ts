@@ -1,7 +1,9 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
+import { DatabaseManager } from '../shared/database/DatabaseManager';
 
 let mainWindow: BrowserWindow;
+let dbManager: DatabaseManager;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -22,9 +24,43 @@ const createWindow = () => {
   }
 };
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // Initialize database
+  dbManager = new DatabaseManager();
+  
+  createWindow();
+  
+  // Send DB status to renderer once window is ready
+  mainWindow.webContents.once('did-finish-load', () => {
+    mainWindow.webContents.send('db-status', {
+      initialized: true,
+      path: '/Users/grossph/Documents/RhythmDNA'
+    });
+  });
+});
+
+// Database IPC handlers
+ipcMain.handle('update-search-criteria', () => {
+  try {
+    dbManager.updateSearchCriteria();
+    return { success: true, message: 'Search criteria updated successfully' };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+});
+
+ipcMain.handle('get-db-status', () => {
+  return {
+    path: '/Users/grossph/Documents/RhythmDNA',
+    mainDbConnected: !!dbManager.getMainDb(),
+    searchDbConnected: !!dbManager.getSearchDb()
+  };
+});
 
 app.on('window-all-closed', () => {
+  if (dbManager) {
+    dbManager.close();
+  }
   if (process.platform !== 'darwin') app.quit();
 });
 

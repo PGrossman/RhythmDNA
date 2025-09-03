@@ -58,3 +58,21 @@ export interface AppSettings {
   audioFormats: string[];
   analysisDepth: 'basic' | 'detailed' | 'comprehensive';
 }
+
+declare global {
+  interface Window {
+    electronAPI: {
+      updateSearchCriteria: () => Promise<{success: boolean, message: string}>;
+      getDbStatus: () => Promise<{path: string, mainDbConnected: boolean, searchDbConnected: boolean}>;
+      onDbStatus: (callback: (status: any) => void) => void;
+      // Other APIs will be added later
+      analyzeAudio: (filePath: string) => Promise<any>;
+      queryOllama: (prompt: string, model?: string) => Promise<any>;
+      selectAudioFile: () => Promise<any>;
+      getSettings: () => Promise<any>;
+      saveSettings: (settings: any) => Promise<any>;
+    }
+  }
+}
+
+export {};
