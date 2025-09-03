@@ -1,6 +1,6 @@
 // import { dialog } from 'electron';
 
-export class FileHandlerService {
+class FileHandlerService {
   static async selectAudioFile(): Promise<string | null> {
     // This will be implemented in the main process
     // For now, return a placeholder
@@ -24,3 +24,5 @@ export class FileHandlerService {
     };
   }
 }
+
+module.exports = { FileHandlerService };

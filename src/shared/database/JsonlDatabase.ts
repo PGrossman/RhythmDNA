@@ -35,7 +35,7 @@ export interface SearchCriterion {
     created_at: string;
 }
 
-class JsonlDatabase {
+export class JsonlDatabase {
     private dbPath: string;
     private audioFilesPath: string;
     private analysisResultsPath: string;
@@ -51,38 +51,56 @@ class JsonlDatabase {
     }
 
     private initialize(): void {
+        let directoryCreated = false;
+        let filesCreated = 0;
+
         // Create directory if it doesn't exist
         if (!fs.existsSync(this.dbPath)) {
             fs.mkdirSync(this.dbPath, { recursive: true });
             console.log(`Created RhythmDNA directory at: ${this.dbPath}`);
+            directoryCreated = true;
         }
 
         // Create JSONL files if they don't exist
-        const files = [this.audioFilesPath, this.analysisResultsPath, this.searchCriteriaPath];
-        let filesCreated = 0;
+        const files = [
+            { path: this.audioFilesPath, name: 'audio_files.jsonl' },
+            { path: this.analysisResultsPath, name: 'analysis_results.jsonl' },
+            { path: this.searchCriteriaPath, name: 'search_criteria.jsonl' }
+        ];
         
-        files.forEach(filePath => {
-            if (!fs.existsSync(filePath)) {
-                fs.writeFileSync(filePath, '');
+        files.forEach(file => {
+            if (!fs.existsSync(file.path)) {
+                fs.writeFileSync(file.path, '');
+                console.log(`Created ${file.name}`);
                 filesCreated++;
             }
         });
 
-        if (filesCreated > 0) {
-            console.log(`Created ${filesCreated} JSONL database files`);
-            this.notifyDbCreation(filesCreated);
+        if (directoryCreated || filesCreated > 0) {
+            this.notifyDbCreation(directoryCreated, filesCreated);
         }
     }
 
-    private notifyDbCreation(filesCreated: number): void {
-        console.log(`Database initialization complete. ${filesCreated} files created.`);
+    private notifyDbCreation(directoryCreated: boolean, filesCreated: number): void {
+        let message = 'Database initialization complete. ';
+        if (directoryCreated) {
+            message += 'RhythmDNA folder created. ';
+        }
+        if (filesCreated > 0) {
+            message += `${filesCreated} database files created.`;
+        }
+        console.log(message);
+        
+        // This will be sent to the renderer process
+        this.creationMessage = message;
     }
+
+    private creationMessage: string = '';
 
     private generateId(): string {
         return Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
     }
 
-    // Audio Files operations
     async insertAudioFile(record: Omit<AudioFileRecord, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
         const id = this.generateId();
         const timestamp = new Date().toISOString();
@@ -98,93 +116,49 @@ class JsonlDatabase {
         return id;
     }
 
-    async getAudioFileByPath(filePath: string): Promise<AudioFileRecord | null> {
-        const fileStream = createReadStream(this.audioFilesPath);
-        const rl = createInterface({ input: fileStream, crlfDelay: Infinity });
-
-        for await (const line of rl) {
-            if (line.trim()) {
-                const record: AudioFileRecord = JSON.parse(line);
-                if (record.file_path === filePath) {
-                    return record;
-                }
-            }
-        }
-        return null;
-    }
-
     async getAllAudioFiles(): Promise<AudioFileRecord[]> {
         const records: AudioFileRecord[] = [];
+        
+        if (!fs.existsSync(this.audioFilesPath)) {
+            return records;
+        }
+
         const fileStream = createReadStream(this.audioFilesPath);
         const rl = createInterface({ input: fileStream, crlfDelay: Infinity });
 
         for await (const line of rl) {
             if (line.trim()) {
-                records.push(JSON.parse(line));
-            }
-        }
-        return records;
-    }
-
-    // Analysis Results operations
-    async insertAnalysisResult(record: Omit<AnalysisRecord, 'id' | 'created_at'>): Promise<string> {
-        const id = this.generateId();
-        const timestamp = new Date().toISOString();
-        
-        const fullRecord: AnalysisRecord = {
-            id,
-            ...record,
-            created_at: timestamp
-        };
-
-        await fs.promises.appendFile(this.analysisResultsPath, JSON.stringify(fullRecord) + '\n');
-        return id;
-    }
-
-    async getAnalysisResultsByAudioFile(audioFileId: string): Promise<AnalysisRecord[]> {
-        const records: AnalysisRecord[] = [];
-        const fileStream = createReadStream(this.analysisResultsPath);
-        const rl = createInterface({ input: fileStream, crlfDelay: Infinity });
-
-        for await (const line of rl) {
-            if (line.trim()) {
-                const record: AnalysisRecord = JSON.parse(line);
-                if (record.audio_file_id === audioFileId) {
-                    records.push(record);
+                try {
+                    records.push(JSON.parse(line));
+                } catch (error) {
+                    console.error('Error parsing line:', line, error);
                 }
             }
         }
         return records;
-    }
-
-    // Search Criteria operations
-    async insertSearchCriterion(record: Omit<SearchCriterion, 'id' | 'created_at'>): Promise<string> {
-        const id = this.generateId();
-        const timestamp = new Date().toISOString();
-        
-        const fullRecord: SearchCriterion = {
-            id,
-            ...record,
-            created_at: timestamp
-        };
-
-        await fs.promises.appendFile(this.searchCriteriaPath, JSON.stringify(fullRecord) + '\n');
-        return id;
     }
 
     async updateSearchCriteria(): Promise<void> {
-        // Read all analysis results
         const analysisResults: AnalysisRecord[] = [];
+        
+        if (!fs.existsSync(this.analysisResultsPath)) {
+            return;
+        }
+
         const fileStream = createReadStream(this.analysisResultsPath);
         const rl = createInterface({ input: fileStream, crlfDelay: Infinity });
 
         for await (const line of rl) {
             if (line.trim()) {
-                analysisResults.push(JSON.parse(line));
+                try {
+                    analysisResults.push(JSON.parse(line));
+                } catch (error) {
+                    console.error('Error parsing analysis result:', error);
+                }
             }
         }
 
-        // Extract unique criteria
+        // Extract unique criteria and append to search criteria file
         const criteriaMap = new Map<string, SearchCriterion>();
 
         analysisResults.forEach(result => {
@@ -204,31 +178,35 @@ class JsonlDatabase {
                                 last_used: new Date().toISOString(),
                                 created_at: new Date().toISOString()
                             });
-                        } else {
-                            const existing = criteriaMap.get(criterionKey)!;
-                            existing.usage_count++;
-                            existing.last_used = new Date().toISOString();
                         }
                     }
                 });
             }
         });
 
-        // Write new search criteria (append only - could be optimized later)
+        // Append new criteria to file
         for (const criterion of criteriaMap.values()) {
             await fs.promises.appendFile(this.searchCriteriaPath, JSON.stringify(criterion) + '\n');
         }
     }
 
-    getDbStatus(): { path: string; filesExist: boolean } {
+    getDbStatus(): { path: string; filesExist: boolean; creationMessage?: string } {
         const filesExist = [this.audioFilesPath, this.analysisResultsPath, this.searchCriteriaPath]
             .every(filePath => fs.existsSync(filePath));
 
-        return {
+        const result: any = {
             path: this.dbPath,
             filesExist
         };
+
+        if (this.creationMessage) {
+            result.creationMessage = this.creationMessage;
+            this.creationMessage = ''; // Clear after sending
+        }
+
+        return result;
     }
 }
 
+// CommonJS export for compatibility
 module.exports = { JsonlDatabase };

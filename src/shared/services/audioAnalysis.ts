@@ -1,11 +1,9 @@
-import { AudioAnalysis, AudioMetadata } from '../types';
-
-export class AudioAnalysisService {
-  static async analyzeAudio(_filePath: string): Promise<AudioAnalysis> {
+class AudioAnalysisService {
+  static async analyzeAudio(_filePath: string): Promise<any> {
     // Placeholder for audio analysis implementation
     // This will integrate with FFMPEG and audio processing libraries
     
-    const metadata: AudioMetadata = {
+    const metadata: any = {
       duration: 0,
       sampleRate: 0,
       channels: 0,
@@ -47,3 +45,5 @@ export class AudioAnalysisService {
     return {};
   }
 }
+
+module.exports = { AudioAnalysisService };

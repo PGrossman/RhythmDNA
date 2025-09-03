@@ -1,6 +1,6 @@
 // Shared TypeScript types for RhythmDNA
 
-export interface AudioMetadata {
+interface AudioMetadata {
   duration: number;
   sampleRate: number;
   channels: number;
@@ -10,7 +10,7 @@ export interface AudioMetadata {
   size?: number;
 }
 
-export interface AudioAnalysis {
+interface AudioAnalysis {
   metadata: AudioMetadata;
   features: AudioFeatures;
   rhythm: RhythmAnalysis;
@@ -18,7 +18,7 @@ export interface AudioAnalysis {
   melody: MelodyAnalysis;
 }
 
-export interface AudioFeatures {
+interface AudioFeatures {
   tempo: number;
   key: string;
   mode: string;
@@ -27,56 +27,37 @@ export interface AudioFeatures {
   danceability: number;
 }
 
-export interface RhythmAnalysis {
+interface RhythmAnalysis {
   bpm: number;
   timeSignature: string;
   rhythmPattern: number[];
   groove: number;
 }
 
-export interface HarmonyAnalysis {
+interface HarmonyAnalysis {
   chordProgression: string[];
   keySignature: string;
   harmonicComplexity: number;
 }
 
-export interface MelodyAnalysis {
+interface MelodyAnalysis {
   pitchRange: number;
   melodicContour: number[];
   tonality: string;
 }
 
-export interface OllamaResponse {
+interface OllamaResponse {
   response: string;
   model: string;
   done: boolean;
 }
 
-export interface AppSettings {
+interface AppSettings {
   ollamaUrl: string;
   defaultModel: string;
   audioFormats: string[];
   analysisDepth: 'basic' | 'detailed' | 'comprehensive';
 }
 
-declare global {
-  interface Window {
-    electronAPI: {
-      // JSONL Database APIs
-      updateSearchCriteria: () => Promise<{success: boolean, message: string}>;
-      getDbStatus: () => Promise<{path: string, filesExist: boolean}>;
-      onDbStatus: (callback: (status: any) => void) => void;
-      insertAudioFile: (record: any) => Promise<{success: boolean, id?: string, message?: string}>;
-      getAllAudioFiles: () => Promise<{success: boolean, data?: any[], message?: string}>;
-      
-      // Other APIs will be added later
-      analyzeAudio: (filePath: string) => Promise<any>;
-      queryOllama: (prompt: string, model?: string) => Promise<any>;
-      selectAudioFile: () => Promise<any>;
-      getSettings: () => Promise<any>;
-      saveSettings: (settings: any) => Promise<any>;
-    }
-  }
-}
-
-export {};
+// For CommonJS, we don't export interfaces as they are compile-time only
+// The interfaces are available for TypeScript compilation but not at runtime

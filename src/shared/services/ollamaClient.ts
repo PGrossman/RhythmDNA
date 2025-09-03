@@ -1,4 +1,4 @@
-export class OllamaClient {
+class OllamaClient {
   constructor(_baseUrl: string = 'http://localhost:11434') {
     // Base URL will be used in future implementation
   }
@@ -8,3 +8,5 @@ export class OllamaClient {
     return 'Ollama response placeholder';
   }
 }
+
+module.exports = { OllamaClient };
