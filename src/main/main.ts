@@ -1,9 +1,9 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
-import { JsonlDatabase } from '../shared/database/JsonlDatabase';
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+const { JsonlDatabase } = require('../shared/database/JsonlDatabase');
 
-let mainWindow: BrowserWindow;
-let db: JsonlDatabase;
+let mainWindow: any;
+let db: any;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -16,11 +16,13 @@ const createWindow = () => {
     },
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile('dist-renderer/index.html');
+    mainWindow.loadFile(path.join(__dirname, '../dist-renderer/index.html'));
   }
 };
 
@@ -45,8 +47,8 @@ ipcMain.handle('update-search-criteria', async () => {
   try {
     await db.updateSearchCriteria();
     return { success: true, message: 'Search criteria updated successfully' };
-  } catch (error) {
-    return { success: false, message: (error as Error).message };
+  } catch (error: any) {
+    return { success: false, message: error.message };
   }
 });
 
@@ -55,12 +57,12 @@ ipcMain.handle('get-db-status', () => {
 });
 
 // Audio file operations
-ipcMain.handle('insert-audio-file', async (_, record) => {
+ipcMain.handle('insert-audio-file', async (_: any, record: any) => {
   try {
     const id = await db.insertAudioFile(record);
     return { success: true, id };
-  } catch (error) {
-    return { success: false, message: (error as Error).message };
+  } catch (error: any) {
+    return { success: false, message: error.message };
   }
 });
 
@@ -68,8 +70,8 @@ ipcMain.handle('get-all-audio-files', async () => {
   try {
     const files = await db.getAllAudioFiles();
     return { success: true, data: files };
-  } catch (error) {
-    return { success: false, message: (error as Error).message };
+  } catch (error: any) {
+    return { success: false, message: error.message };
   }
 });
 
