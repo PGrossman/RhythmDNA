@@ -1,9 +1,9 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
-import { DatabaseManager } from '../shared/database/DatabaseManager';
+import { JsonlDatabase } from '../shared/database/JsonlDatabase';
 
 let mainWindow: BrowserWindow;
-let dbManager: DatabaseManager;
+let db: JsonlDatabase;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -25,24 +25,25 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-  // Initialize database
-  dbManager = new DatabaseManager();
+  // Initialize JSONL database
+  db = new JsonlDatabase();
   
   createWindow();
   
   // Send DB status to renderer once window is ready
   mainWindow.webContents.once('did-finish-load', () => {
+    const status = db.getDbStatus();
     mainWindow.webContents.send('db-status', {
       initialized: true,
-      path: '/Users/grossph/Documents/RhythmDNA'
+      ...status
     });
   });
 });
 
 // Database IPC handlers
-ipcMain.handle('update-search-criteria', () => {
+ipcMain.handle('update-search-criteria', async () => {
   try {
-    dbManager.updateSearchCriteria();
+    await db.updateSearchCriteria();
     return { success: true, message: 'Search criteria updated successfully' };
   } catch (error) {
     return { success: false, message: error.message };
@@ -50,17 +51,29 @@ ipcMain.handle('update-search-criteria', () => {
 });
 
 ipcMain.handle('get-db-status', () => {
-  return {
-    path: '/Users/grossph/Documents/RhythmDNA',
-    mainDbConnected: !!dbManager.getMainDb(),
-    searchDbConnected: !!dbManager.getSearchDb()
-  };
+  return db.getDbStatus();
+});
+
+// Audio file operations
+ipcMain.handle('insert-audio-file', async (event, record) => {
+  try {
+    const id = await db.insertAudioFile(record);
+    return { success: true, id };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+});
+
+ipcMain.handle('get-all-audio-files', async () => {
+  try {
+    const files = await db.getAllAudioFiles();
+    return { success: true, data: files };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 });
 
 app.on('window-all-closed', () => {
-  if (dbManager) {
-    dbManager.close();
-  }
   if (process.platform !== 'darwin') app.quit();
 });
 

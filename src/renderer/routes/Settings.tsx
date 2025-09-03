@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface DbStatus {
   path: string;
-  mainDbConnected: boolean;
-  searchDbConnected: boolean;
+  filesExist: boolean;
   initialized?: boolean;
 }
 
@@ -20,7 +19,7 @@ export default function Settings() {
     window.electronAPI.onDbStatus((status: DbStatus) => {
       setDbStatus(status);
       if (status.initialized) {
-        setUpdateMessage('Database initialized successfully!');
+        setUpdateMessage('JSONL database files initialized successfully!');
         setTimeout(() => setUpdateMessage(''), 3000);
       }
     });
@@ -42,7 +41,7 @@ export default function Settings() {
       
       {/* Database Status Section */}
       <div className="bg-white p-6 rounded-lg border mb-6">
-        <h3 className="text-lg font-semibold mb-4">Database Status</h3>
+        <h3 className="text-lg font-semibold mb-4">JSONL Database Status</h3>
         
         {dbStatus && (
           <div className="space-y-3">
@@ -51,20 +50,17 @@ export default function Settings() {
               <span className="text-gray-600 font-mono">{dbStatus.path}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-medium">Main Database:</span>
+              <span className="font-medium">Database Files:</span>
               <span className={`px-2 py-1 rounded text-sm ${
-                dbStatus.mainDbConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                dbStatus.filesExist ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}>
-                {dbStatus.mainDbConnected ? 'Connected' : 'Disconnected'}
+                {dbStatus.filesExist ? 'Available' : 'Missing'}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Search Database:</span>
-              <span className={`px-2 py-1 rounded text-sm ${
-                dbStatus.searchDbConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-                {dbStatus.searchDbConnected ? 'Connected' : 'Disconnected'}
-              </span>
+            <div className="text-sm text-gray-600 mt-2">
+              <div>• audio_files.jsonl - Audio file metadata</div>
+              <div>• analysis_results.jsonl - Analysis results</div>
+              <div>• search_criteria.jsonl - Search criteria cache</div>
             </div>
           </div>
         )}
@@ -113,12 +109,6 @@ export default function Settings() {
             {updateMessage}
           </div>
         )}
-      </div>
-
-      {/* Future Settings Sections */}
-      <div className="bg-white p-6 rounded-lg border">
-        <h3 className="text-lg font-semibold mb-4">Analysis Settings</h3>
-        <p className="text-gray-600">Analysis configuration options will be added here.</p>
       </div>
     </div>
   );

@@ -1,9 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Database APIs
+  // JSONL Database APIs
   updateSearchCriteria: () => ipcRenderer.invoke('update-search-criteria'),
   getDbStatus: () => ipcRenderer.invoke('get-db-status'),
+  insertAudioFile: (record: any) => ipcRenderer.invoke('insert-audio-file', record),
+  getAllAudioFiles: () => ipcRenderer.invoke('get-all-audio-files'),
   
   // Listen for DB status updates
   onDbStatus: (callback: (status: any) => void) => {

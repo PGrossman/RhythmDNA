@@ -62,9 +62,13 @@ export interface AppSettings {
 declare global {
   interface Window {
     electronAPI: {
+      // JSONL Database APIs
       updateSearchCriteria: () => Promise<{success: boolean, message: string}>;
-      getDbStatus: () => Promise<{path: string, mainDbConnected: boolean, searchDbConnected: boolean}>;
+      getDbStatus: () => Promise<{path: string, filesExist: boolean}>;
       onDbStatus: (callback: (status: any) => void) => void;
+      insertAudioFile: (record: any) => Promise<{success: boolean, id?: string, message?: string}>;
+      getAllAudioFiles: () => Promise<{success: boolean, data?: any[], message?: string}>;
+      
       // Other APIs will be added later
       analyzeAudio: (filePath: string) => Promise<any>;
       queryOllama: (prompt: string, model?: string) => Promise<any>;
